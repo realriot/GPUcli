@@ -17,3 +17,19 @@ There are some requirements which have to be fulfilled to make this tool work.
 * You have to enable '''Google Photos API''' within the google cloud console (https://console.cloud.google.com/apis)
 * You have to create an OAuth-Client-ID within this console.    
 * Remove any existing client permissions on first start: https://myaccount.google.com/u/0/permissions.
+
+=== Authorize access ===
+Running this tool the first time will trigger a access_token generation process. You will need to allow this tool
+to access your Google Photos library.
+ 
+=== Usage ===
+Quick start:
+
+ ./GPUcli.py <folder>
+ 
+You can see all the mighty arguments by showing the help:
+
+ ./ff4d.py -h
+
+Greets and have fun with this little goodie...
+''Sascha Schmidt''
