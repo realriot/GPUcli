@@ -21,6 +21,9 @@ There are some requirements which have to be fulfilled to make this tool work.
  client_id = ''
  client_secret = ''
 * Remove any existing client permissions on first start: https://myaccount.google.com/u/0/permissions.
+* Install '''oauthlib''' and '''requests_oauthlib''' python libraries within the folder of this tool.
+** https://pypi.org/project/oauthlib/
+**https://github.com/requests/requests-oauthlib
 
 === Authorize access ===
 Running this tool the first time will trigger a access_token generation process. You will need to allow this tool
