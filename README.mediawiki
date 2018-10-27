@@ -23,13 +23,9 @@ Running this tool the first time will trigger a access_token generation process.
 to access your Google Photos library.
  
 === Usage ===
-Quick start:
-
- ./GPUcli.py <folder>
- 
 You can see all the mighty arguments by showing the help:
 
- ./ff4d.py -h
+ ./GPUcli.py -h
 
 Greets and have fun with this little goodie...
 ''Sascha Schmidt''
