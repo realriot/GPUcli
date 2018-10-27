@@ -15,7 +15,11 @@ Thanks in advance
 === Requirements ===
 There are some requirements which have to be fulfilled to make this tool work.
 * You have to enable '''Google Photos API''' within the google cloud console (https://console.cloud.google.com/apis)
-* You have to create an OAuth-Client-ID within this console.    
+* You have to create an OAuth-Client-ID within this console.  
+* Configure the generated '''client_id''' and '''client_secret''' on the first lines of this tool.
+ # Define client_id und client_secret created by the google api console.
+ client_id = ''
+ client_secret = ''
 * Remove any existing client permissions on first start: https://myaccount.google.com/u/0/permissions.
 
 === Authorize access ===
