@@ -21,7 +21,7 @@ There are some requirements which have to be fulfilled to make this tool work.
 === Authorize access ===
 Running this tool the first time will trigger a access_token generation process. You will need to allow this tool
 to access your Google Photos library.
- 
+
 === Usage ===
 You can see all the mighty arguments by showing the help:
 
