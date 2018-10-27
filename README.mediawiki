@@ -24,7 +24,7 @@ to access your Google Photos library.
 
 * You will have to copy an URL and paste it into your browser. A google website will appear where you will have to confirm the needed permissions.
 * Afterwards google will redirect you to an invalid '''localhost''' URL. You have to copy this URL from your browser into your terminal client when the GPUcli.py asks you for that.
-* Finally the tool will save an token.dat to your local filesystem where your acess token will be stored.
+* Finally the tool will save an '''token.dat''' to your local filesystem where your access token will be stored.
 
 === Usage ===
 You can see all the mighty arguments by showing the help:
