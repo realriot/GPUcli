@@ -83,6 +83,22 @@ def refresh_token():
     oauth.refresh_token('https://accounts.google.com/o/oauth2/token', **extra)
     save_token(oauth.token)
 
+# Function: Check API result for critical error messages.
+def checkAPIresult(apiresult, message):
+    if 'error' in apiresult:
+        print "ERROR: " + message
+        print apiresult['error']['status'] + ": " + apiresult['error']['message']
+        print "Exiting..."
+        print
+        exit(-1)
+
+    if 'message' in apiresult:
+        print "ERROR: " + message
+        print apiresult['message']
+        print "Exiting..."
+        print
+        exit(-1)
+
 # Function: Fetch user informations.
 def getUserInfo():
     check_token()
@@ -91,11 +107,13 @@ def getUserInfo():
 
 # Function: Create album
 def g_createAlbum(title):
+    title = ""
     album = {"album": {"title": title}}
 
     try:
         check_token()
         r = oauth.post('https://photoslibrary.googleapis.com/v1/albums', json=album)
+        checkAPIresult(json.loads(r.text), 'Failed to create album!')
     except Exception, e:
         print "ERROR: Failed to create album! " + str(e)
         exit(-1)
@@ -112,13 +130,13 @@ def g_uploadMedia(file, filename):
     try:
         f = open(file, 'rb')
         r = oauth.post('https://photoslibrary.googleapis.com/v1/uploads', data=f.read(), headers=headers)
+        checkAPIresult(json.loads(r.text), 'Failed to upload file!')
         f.close()
     except Exception,e :
         print "ERROR: Failed to upload file! " + str(e)
         exit(-1)
 
-    return r.text
-
+    return json.loads(r.text)
 
 # Function: Create mediaitem from uploaded file.
 def g_createMediaItems(upload_list, albumid=None):
@@ -136,11 +154,20 @@ def g_createMediaItems(upload_list, albumid=None):
 
     try:
         r = oauth.post('https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate', json=newmediaitems)
+        checkAPIresult(json.loads(r.text), 'Failed to commit mediaitems!')
     except Exception, e:
         print "ERROR: Failed to create mediaitem! " + str(e)
         exit(-1)
 
-    return json.loads(r.text)
+    apiresult = json.loads(r.text)
+    if 'error' in apiresult:
+        print "ERROR: Failed create media items!"
+        print apiresult['error']['status'] + ": " + apiresult['error']['message']
+        print "Exiting..."
+        print
+        exit(-1)
+
+    return apiresult
 
 ########
 # MAIN #
@@ -203,7 +230,6 @@ for file in files:
         print "Uploading... " + filepath
         upload_token = g_uploadMedia(filepath, file)
         uploads.append({upload_token: file})
-        #uploads.append({'ABC123': file})
 
 if len(uploads) > 0:
     albumid = None
