@@ -4,11 +4,9 @@ from requests_oauthlib import OAuth2Session
 
 version = "1.0"
 
-# Remove already existing client permissions on first start: https://myaccount.google.com/u/0/permissions.
-
 # Define client_id und client_secret created by the google api console.
-client_id = ''
-client_secret = ''
+client_id = '288437146912-mv1ekb2rdvkcopkr6b18d6ubq1qtig31.apps.googleusercontent.com'
+client_secret = 'Bh27X9e-TsUq2TNuk9AnoW45'
 
 redirect_uri = 'https://localhost'
 
@@ -36,9 +34,15 @@ def save_token(token):
         f = open('token.dat', 'w')
         f.write(json.dumps(token))
         f.close()
-    except:
-        print "ERROR: Failed to save token data!"
+    except Exception, e:
+        print "ERROR: Failed to save token data! " + str(e)
 
+# Function: Check for expired access_token.
+def check_token():
+    unixtime = time.time()
+    if(unixtime - 600 > oauth.token['expires_at']):
+        print "access_token expired. Refreshing..."
+        refresh_token()
 
 # Function: Authorize against google user account.
 def auth_app():
@@ -61,8 +65,8 @@ def auth_app():
             'https://accounts.google.com/o/oauth2/token',
             authorization_response=authorization_response,
             client_secret=client_secret)
-    except:
-        print "ERROR: Failed to fetch access token!"
+    except Exception, e:
+        print "ERROR: Failed to fetch access token! " + str(e)
         exit(-1)
 
     # Save fetched token to data file for further use.
@@ -81,24 +85,26 @@ def refresh_token():
 
 # Function: Fetch user informations.
 def getUserInfo():
+    check_token()
     r = oauth.get('https://www.googleapis.com/oauth2/v1/userinfo')
     return json.loads(r.text)
-
 
 # Function: Create album
 def g_createAlbum(title):
     album = {"album": {"title": title}}
 
     try:
+        check_token()
         r = oauth.post('https://photoslibrary.googleapis.com/v1/albums', json=album)
-    except:
-        print "ERROR: Failed to create album!"
+    except Exception, e:
+        print "ERROR: Failed to create album! " + str(e)
         exit(-1)
 
     return json.loads(r.text)
 
 # Function: Upload file to google photos.
 def g_uploadMedia(file, filename):
+    check_token()
     headers = {'Content-type': 'application/octet-stream',
                'X-Goog-Upload-File-Name': filename,
                'X-Goog-Upload-Protocol': 'raw'}
@@ -107,8 +113,8 @@ def g_uploadMedia(file, filename):
         f = open(file, 'rb')
         r = oauth.post('https://photoslibrary.googleapis.com/v1/uploads', data=f.read(), headers=headers)
         f.close()
-    except:
-        print "ERROR: Failed to upload file!"
+    except Exception,e :
+        print "ERROR: Failed to upload file! " + str(e)
         exit(-1)
 
     return r.text
@@ -116,6 +122,7 @@ def g_uploadMedia(file, filename):
 
 # Function: Create mediaitem from uploaded file.
 def g_createMediaItems(upload_list, albumid=None):
+    check_token()
     media_list = []
     for media in upload_list:
         item = {'description': media.values()[0],
@@ -129,8 +136,8 @@ def g_createMediaItems(upload_list, albumid=None):
 
     try:
         r = oauth.post('https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate', json=newmediaitems)
-    except:
-        print "ERROR: Failed to create mediaitem."
+    except Exception, e:
+        print "ERROR: Failed to create mediaitem! " + str(e)
         exit(-1)
 
     return json.loads(r.text)
@@ -162,8 +169,8 @@ try:
     #    print "access_token expired. Refreshing..."
     #    refresh_token()
     userinfo = getUserInfo()
-except:
-    print "ERROR: Failed to log in!"
+except Exception, e:
+    print "ERROR: Failed to log in! " + str(e)
     exit(-1)
 
 print "Google Photos Upload - CLI Script V" + version
