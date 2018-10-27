@@ -5,8 +5,8 @@ from requests_oauthlib import OAuth2Session
 version = "1.0"
 
 # Define client_id und client_secret created by the google api console.
-client_id = '288437146912-mv1ekb2rdvkcopkr6b18d6ubq1qtig31.apps.googleusercontent.com'
-client_secret = 'Bh27X9e-TsUq2TNuk9AnoW45'
+client_id = ''
+client_secret = ''
 
 redirect_uri = 'https://localhost'
 
