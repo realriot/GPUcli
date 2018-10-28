@@ -40,7 +40,8 @@ def save_token(token):
 # Function: Check for expired access_token.
 def check_token():
     unixtime = time.time()
-    if(unixtime - 600 > oauth.token['expires_at']):
+
+    if(unixtime + 600 > oauth.token['expires_at']):
         print "access_token expired. Refreshing..."
         refresh_token()
 
@@ -189,13 +190,10 @@ if token == "":
     token = auth_app()
 
 # Start with a valid token.
-try:
-    oauth = OAuth2Session(client_id, token=token)
+oauth = OAuth2Session(client_id, token=token)
+check_token()
 
-    #unixtime = time.time()
-    #if(unixtime - 600 > oauth.token['expires_at']):
-    #    print "access_token expired. Refreshing..."
-    #    refresh_token()
+try:
     userinfo = getUserInfo()
 except Exception, e:
     print "ERROR: Failed to log in! " + str(e)
@@ -218,7 +216,8 @@ folder = path.split(os.sep)[-1]
 if folder == "":
     folder = "root"
 print "Uploading pictures from directory: " + path
-print "Foldername: " + folder
+if args.album == True:
+    print "Using this folder name for album creating: " + folder
 print
 
 # Look at directory and identify files to upload.
@@ -229,9 +228,12 @@ for file in files:
 
     if not os.path.isdir(filepath) and not file.startswith('.'):
         print "Uploading... " + filepath
-        upload_token = g_uploadMedia(filepath, file)
-        uploads.append({upload_token: file})
+        #upload_token = g_uploadMedia(filepath, file)
+        #uploads.append({upload_token: file})
+        uploads.append({'token': file})
 
+print len(uploads)
+exit(-1)
 if len(uploads) > 0:
     albumid = None
 
@@ -241,15 +243,24 @@ if len(uploads) > 0:
         albumid = g_createAlbum(folder)
         albumid = albumid['id']
 
-    # Finally add commit uploads to google photos.
-    upload_results = g_createMediaItems(uploads, albumid)
-
-    # Check upload results.
+    # Finally add commit uploads to google photos (max 50/commit)
     upload_ok = True
-    for result in upload_results['newMediaItemResults']:
-        if result['status']['message'] != "OK":
-            print result['mediaItem']['filename'] + ": " + result['status']['message']
-            upload_ok = False
+    item_count = 0
+    sum_count = 0
+    upload_charge = []
+    for upload_item in uploads:
+        upload_charge.append(upload_item)
+        item_count = item_count + 1
+        sum_count = sum_count + 1
+
+        if item_count == 50 or sum_count == len(uploads):
+            upload_results = g_createMediaItems(upload_charge, albumid)
+            for result in upload_results['newMediaItemResults']:
+                if result['status']['message'] != "OK":
+                    print result['mediaItem']['filename'] + ": " + result['status']['message']
+                    upload_ok = False
+            item_count = 0
+            upload_charge = []
 
     if upload_ok == True:
         print "Media successfully uploaded!"
