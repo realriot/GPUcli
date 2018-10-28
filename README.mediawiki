@@ -4,7 +4,7 @@ At this moment the tool will '''NOT''' walk through directory trees. It will upl
 It's possible to use the '''ALBUM''' switch, which will make this tool create an album named by the source folder name. The uploaded media will be added to this album.
 
 === Important to remember ===
-'''All media items uploaded to Google Photos through the API are stored in full resolution at original quality. These uploads will count towards storage in their Google Account.'''
+'''All media items uploaded to Google Photos through the API are stored in full resolution at original quality. These uploads will count towards storage of the Google Account.'''
 
 === Donation ===
 Since I'm developing in my free time I'd like to ask you to support my work.
