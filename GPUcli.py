@@ -228,12 +228,9 @@ for file in files:
 
     if not os.path.isdir(filepath) and not file.startswith('.'):
         print "Uploading... " + filepath
-        #upload_token = g_uploadMedia(filepath, file)
-        #uploads.append({upload_token: file})
-        uploads.append({'token': file})
+        upload_token = g_uploadMedia(filepath, file)
+        uploads.append({upload_token: file})
 
-print len(uploads)
-exit(-1)
 if len(uploads) > 0:
     albumid = None
 
