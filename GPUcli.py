@@ -107,7 +107,6 @@ def getUserInfo():
 
 # Function: Create album
 def g_createAlbum(title):
-    title = ""
     album = {"album": {"title": title}}
 
     try:
@@ -130,13 +129,15 @@ def g_uploadMedia(file, filename):
     try:
         f = open(file, 'rb')
         r = oauth.post('https://photoslibrary.googleapis.com/v1/uploads', data=f.read(), headers=headers)
-        checkAPIresult(json.loads(r.text), 'Failed to upload file!')
         f.close()
     except Exception,e :
         print "ERROR: Failed to upload file! " + str(e)
         exit(-1)
 
-    return json.loads(r.text)
+    try:
+        checkAPIresult(json.loads(r.text), 'Failed to upload file!')
+    finally:
+        return r.text
 
 # Function: Create mediaitem from uploaded file.
 def g_createMediaItems(upload_list, albumid=None):
