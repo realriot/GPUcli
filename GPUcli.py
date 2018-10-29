@@ -15,6 +15,17 @@ scope = ['https://www.googleapis.com/auth/userinfo.email',
          'https://www.googleapis.com/auth/userinfo.profile',
          'https://www.googleapis.com/auth/photoslibrary']
 
+# Function: Debug output.
+def debug(message):
+    debugmsg = "DEBUG: " + message
+
+    if args.debug == True:
+        try:
+            f = open('debug.log', 'w')
+            f.write(debugmsg)
+            f.close()
+        finally:
+            print debugmsg
 
 # Function: load token from file.
 def load_token():
@@ -24,6 +35,8 @@ def load_token():
         f.close()
     except:
         token = ""
+
+    debug("Token loaded from file: " + str(token))
 
     return token
 
@@ -36,13 +49,15 @@ def save_token(token):
         f.close()
     except Exception, e:
         print "ERROR: Failed to save token data! " + str(e)
+    debug("Token saved to file: " + str(token))
+
 
 # Function: Check for expired access_token.
 def check_token():
     unixtime = time.time()
 
     if(unixtime + 600 > oauth.token['expires_at']):
-        print "access_token expired. Refreshing..."
+        debug('access_token expired. Refreshing...')
         refresh_token()
 
 # Function: Authorize against google user account.
@@ -86,6 +101,8 @@ def refresh_token():
 
 # Function: Check API result for critical error messages.
 def checkAPIresult(apiresult, message):
+    debug("API result: " + str(apiresult))
+
     if 'error' in apiresult:
         print "ERROR: " + message
         print apiresult['error']['status'] + ": " + apiresult['error']['message']
@@ -128,6 +145,7 @@ def g_uploadMedia(file, filename):
                'X-Goog-Upload-Protocol': 'raw'}
 
     try:
+        debug("Uploading with set headers: " + str(headers))
         f = open(file, 'rb')
         r = oauth.post('https://photoslibrary.googleapis.com/v1/uploads', data=f.read(), headers=headers)
         f.close()
@@ -155,6 +173,7 @@ def g_createMediaItems(upload_list, albumid=None):
         newmediaitems = {'albumId': albumid, 'newMediaItems': media_list}
 
     try:
+        debug("Commit post: " + newmediaitems)
         r = oauth.post('https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate', json=newmediaitems)
         checkAPIresult(json.loads(r.text), 'Failed to commit mediaitems!')
     except Exception, e:
@@ -180,7 +199,11 @@ parser = argparse.ArgumentParser(
 parser.add_argument('directory', help='Directory to upload.')
 parser.add_argument('-a', '--album', help='Create an album and add the uploaded. Album will be named by the <directory>.',
     action='store_const', const=True)
+parser.add_argument('-d', '--debug', help='Enable the more verbose debug output.',
+    action='store_const', const=True)
 args = parser.parse_args()
+
+debug('Starting main functions...')
 
 # Recover token data from file.
 token = load_token()
@@ -190,10 +213,12 @@ if token == "":
     token = auth_app()
 
 # Start with a valid token.
+debug("Creating OAuth2Session with access_token")
 oauth = OAuth2Session(client_id, token=token)
 check_token()
 
 try:
+    debug("Fetching userinformations using: getUserInfo()")
     userinfo = getUserInfo()
 except Exception, e:
     print "ERROR: Failed to log in! " + str(e)
@@ -226,12 +251,14 @@ uploads = []
 for file in files:
     filepath = path + '/' + file
 
+    debug("Checking if this file can be uploaded: " + file)
     if not os.path.isdir(filepath) and not file.startswith('.'):
         print "Uploading... " + filepath
         upload_token = g_uploadMedia(filepath, file)
         uploads.append({upload_token: file})
 
 if len(uploads) > 0:
+    debug('Media uploaded. Ready to commit the media.')
     albumid = None
 
     # Create album if commandline argument is given.
@@ -251,7 +278,9 @@ if len(uploads) > 0:
         sum_count = sum_count + 1
 
         if item_count == 50 or sum_count == len(uploads):
+            debug("Mediaobjects to commit: " + upload_charge)
             upload_results = g_createMediaItems(upload_charge, albumid)
+            debug("Upload results: " + upload_results)
             for result in upload_results['newMediaItemResults']:
                 if result['status']['message'] != "OK":
                     print result['mediaItem']['filename'] + ": " + result['status']['message']
